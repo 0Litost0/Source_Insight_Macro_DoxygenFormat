@@ -1,0 +1,28 @@
+1.macro 语言中的下标，像C语言一样，也都是从0开始（不论是行和例）的
+2.GetWndSel的返回值中的lnFirst字段都从下标1开始的么？
+3.Ask (prompt_string)，可以实现交互式程序
+4.getreg 获取注册表键值
+5.setreg 设置注册表键值
+6.Msg 提示框，用以实现交互式程序
+
+
+7.DelBufLine
+8.InsBufLine
+
+debug示例：
+	ichFirst=sel.ichFirst;
+	ichLim=sel.ichLim;
+	msg("sel.ichFirst is:@ichFirst@");
+	msg("sel.ichLim is:@ichLim@");
+	cnt=3;
+	msg("cnt is:@cnt@");
+	
+	
+	sel = GetWndSel(hwnd)
+	szLine=GetBufLine(hbuf, sel.lnFirst);
+	lenLine=strlen(szLine);
+	newlnFirst=sel.lnFirst;
+	newichFirst=sel.ichFirst; 
+	msg("newlnFirst_2 is:@newlnFirst@");
+	msg("newichFirst_2 is:@newichFirst@");
+	msg("Cur Line is:@szLine@");	
