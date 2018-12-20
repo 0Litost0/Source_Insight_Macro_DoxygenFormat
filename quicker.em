@@ -1,3 +1,119 @@
+macro CmdTest()
+{
+    hwnd = GetCurrentWnd()
+    if (hwnd == 0)
+        stop
+    sel = GetWndSel(hwnd)
+  
+	lnFirst = sel.lnFirst;
+	ichFirst = sel.ichFirst;
+	lnLast = sel.lnLast;
+	ichLim = sel.ichLim;
+	fExtended = sel.fExtended;
+	fRect = sel.fRect;
+	hbuf = GetWndBuf(hwnd)
+	chTab = CharFromAscii(9)
+    Msg("sel.lnFirst is @lnFirst@")
+    Msg("sel.ichFirst is @ichFirst@")
+    Msg("sel.lnLast is @lnLast@")
+    Msg("sel.ichLim is @ichLim@")
+    Msg("sel.fExtended is @fExtended@")
+    Msg("sel.fRect is @fRect@")
+    Msg("hbuf is @hbuf@")
+    Msg("CharFromAscii(9) is @chTab@")
+}
+
+macro DoxygenNote()
+{
+ 	hwnd = GetCurrentWnd()
+	if (hwnd == 0)
+    	stop
+	//sel = GetWndSel(hwnd)
+
+    sel = GetWndSel(hwnd)
+
+	hbuf = GetWndBuf(hwnd)
+	szLine = GetBufLine(hbuf, sel.lnFirst);    
+
+    if(sel.lnFirst == sel.lnLast && sel.ichFirst == sel.ichLim)
+    {
+    	//不，我这里故意不判断光标后边是否还有内容，如果有内容，我就认为你是要屏蔽掉
+    	lineLen=strlen(szLine)
+    	index=sel.ichFirst
+    	isCommentforward=0;
+    	//首先判断是对前边的注释，还是对后边的注释
+    	index=0
+    	chTab=CharFromAscii(9)
+
+     	while(index < sel.ichFirst)
+    	{
+    		if(szLine[index] != " " && szLine[index] != chTab)
+    		{
+    			//Msg("是对前文的注释");
+    			isCommentforward=1;   			
+    			break;
+    		}
+    		index=index+1;
+    	}  
+    	index=sel.ichFirst+1
+    	hasTail=0
+    	while(index < lineLen)
+    	{
+    		if(szLine[index] != " " && szLine[index] != chTab)
+    		{
+    			//Msg("光标后边存在内容");
+    			hasTail=1
+    			break;
+    		}
+    		index=index+1;
+    	}
+    	newLine=strmid(szLine, 0, sel.ichFirst);
+
+		newLine=cat(newLine, "///@note");
+
+     	if(hasTail==1)
+    	{
+    		tailLine=strmid(szLine, sel.ichFirst, lineLen);
+    		newLine=cat(newLine, tailLine)
+    	}   
+	
+    	DelBufLine(hbuf, sel.lnFirst);
+    	
+
+
+    	//Msg("DelBufLine");
+    	InsBufLine(hbuf, sel.lnFirst, newLine);
+    	
+    	//Msg("InsBufLine");
+
+   
+        sel = GetWndSel(hwnd)
+        szLine=GetBufLine(hbuf, sel.lnFirst);
+        lenLine=strlen(szLine);
+
+        if(sel.lnFirst == sel.lnLast && sel.ichFirst == sel.ichLim)
+        {
+        	sel.ichFirst=lenLine
+        	sel.ichLim=lenLine
+			lenLine=strlen(szLine);
+	        newlnFirst=sel.lnFirst;
+			newichFirst=sel.ichFirst; 
+//				msg("newlnFirst_2 is:@newlnFirst@");
+//				msg("newichFirst_2 is:@newichFirst@");
+//				msg("Cur Line is:@szLine@");	  
+			SetWndSel(hwnd, sel)
+
+        }
+
+    	return
+    }
+    else
+    {
+    	Msg("暂无法对选中的内容进行注释");
+    }
+}
+
+
 macro DoxygenComment()
 {
  	hwnd = GetCurrentWnd()
@@ -134,7 +250,14 @@ macro AutoExpand()
         szMyName = Ask("Enter your name:")
         setreg(MYNAME, szMyName)
     }
-    // get line the selection (insertion point) is on
+
+    /*取得组织名称，一般为公司名称*/
+    szOrganizationName = getreg(MYNAME)
+    if(strlen( szOrganizationName ) == 0)
+    {
+        szOrganizationName = Ask("Enter your name:")
+        setreg(ORGANIZATION_NAME, szOrganizationName)
+    }    // get line the selection (insertion point) is on
     szLine = GetBufLine(hbuf, sel.lnFirst);
     // parse word just to the left of the insertion point
     wordinfo = GetWordLeftOfIch(sel.ichFirst, szLine)
@@ -153,7 +276,6 @@ macro AutoExpand()
     }
     szLine1 = strmid(szLine,0,ich)
     szLine = strmid(szLine, 0, ich) # "    "
-    
     sel.lnFirst = sel.lnLast
     sel.ichFirst = wordinfo.ich
     sel.ichLim = wordinfo.ich
@@ -1021,7 +1143,63 @@ macro ExpandProcCN(szMyName,wordinfo,szLine,szLine1,nVer,ln,sel)
         ln = CommentContent(hbuf,ln + 1,szLeft,szContent,1)
         return
     }
-    else if (szCmd == "ab")
+    else if (szCmd == "note")
+    {   
+        SysTime = GetSysTime(1)
+        sz=SysTime.Year
+        sz1=SysTime.month
+        sz3=SysTime.day
+        
+        DelBufLine(hbuf, ln)
+        szContent = Ask("标记原因")
+        szLine1 = cat(szLine1,"///\@note ");
+        szLine1 = cat(szLine1,szContent);
+        if(strlen(szLine1) > 70)
+        {
+            Msg("右边空间太小,请用新的行")
+            stop 
+        }        
+        InsBufLine(hbuf, ln, "@szLine1@");
+        return
+    }
+    else if (szCmd == "todo")
+    {   
+        SysTime = GetSysTime(1)
+        sz=SysTime.Year
+        sz1=SysTime.month
+        sz3=SysTime.day
+        
+        DelBufLine(hbuf, ln)
+        szContent = Ask("标记原因")
+        szLine1 = cat(szLine1,"///\@todo ");
+        szLine1 = cat(szLine1,szContent);
+        if(strlen(szLine1) > 70)
+        {
+            Msg("右边空间太小,请用新的行")
+            stop 
+        }        
+        InsBufLine(hbuf, ln, "@szLine1@");
+        return
+    } 
+    else if (szCmd == "bug")
+    {   
+        SysTime = GetSysTime(1)
+        sz=SysTime.Year
+        sz1=SysTime.month
+        sz3=SysTime.day
+        
+        DelBufLine(hbuf, ln)
+        szContent = Ask("标记原因")
+        szLine1 = cat(szLine1,"///\@bug ");
+        szLine1 = cat(szLine1,szContent);
+        if(strlen(szLine1) > 70)
+        {
+            Msg("右边空间太小,请用新的行")
+            stop 
+        }        
+        InsBufLine(hbuf, ln, "@szLine1@");
+        return
+    }      else if (szCmd == "ab")
     {
         SysTime = GetSysTime(1)
         sz=SysTime.Year
@@ -1786,10 +1964,17 @@ macro InsertFileHeaderEN(hbuf, ln,szName,szContent)
     {
         stop
     }
+
+    if(strlen( szOrganizationName ) == 0)
+    {
+		 szOrganizationName = "XXX"
+    }
+
+    
     GetFunctionList(hbuf,hnewbuf)
     InsBufLine(hbuf, ln + 0,  "/******************************************************************************")
     InsBufLine(hbuf, ln + 1,  "")
-    InsBufLine(hbuf, ln + 2,  "  Copyright (C), 2001-2011, DCN Co., Ltd.")
+    InsBufLine(hbuf, ln + 2,  "                  Copyright \@1998 - 2018 @szOrganizationName@")
     InsBufLine(hbuf, ln + 3,  "")
     InsBufLine(hbuf, ln + 4,  " ******************************************************************************")
     sz = GetFileName(GetBufName (hbuf))
@@ -1872,46 +2057,51 @@ macro InsertFileHeaderCN(hbuf, ln,szName,szContent)
     {
         stop
     }
-    GetFunctionList(hbuf,hnewbuf)
+    szOrganizationName = getreg(ORGANIZATION_NAME)
+
+    if(strlen( szOrganizationName ) == 0)
+    {
+		 szOrganizationName = "XXX"
+    }
     InsBufLine(hbuf, ln + 0,  "/******************************************************************************")
     InsBufLine(hbuf, ln + 1,  "")
-    InsBufLine(hbuf, ln + 2,  "                  Copyright @1998 - 2017 *****技术股份有限公司")
+    InsBufLine(hbuf, ln + 2,  "                  Copyright \@1998 - 2018 @szOrganizationName@")
     InsBufLine(hbuf, ln + 3,  "")
     InsBufLine(hbuf, ln + 4,  " ******************************************************************************")
     sz = GetFileName(GetBufName (hbuf))
-    InsBufLine(hbuf, ln + 5,  "  文 件 名   : @sz@")
-    InsBufLine(hbuf, ln + 6,  "  版 本 号   : 初稿")
-    InsBufLine(hbuf, ln + 7,  "  作    者   : @szName@")
+    InsBufLine(hbuf, ln + 5,  "文 件 名   : @sz@")
+    InsBufLine(hbuf, ln + 6,  " 					")
+    InsBufLine(hbuf, ln + 7,  "\@author @szName@")
     SysTime = GetSysTime(1)
     szTime = SysTime.Date
-    InsBufLine(hbuf, ln + 8,  "  生成日期   : @szTime@")
+    InsBufLine(hbuf, ln + 8,  "\@date @szTime@")
     InsBufLine(hbuf, ln + 9,  "  最近修改   :")
     iLen = strlen (szContent)
     nlnDesc = ln
     szTmp = "  功能描述   : "
-    InsBufLine(hbuf, ln + 10, "  功能描述   : @szContent@")
+    InsBufLine(hbuf, ln + 10, "\@file @szContent@")
     InsBufLine(hbuf, ln + 11, "  函数列表   :")
     
     //插入函数列表
     ln = InsertFileList(hbuf,hnewbuf,ln + 12) - 12
     closebuf(hnewbuf)
-    InsBufLine(hbuf, ln + 12, "  修改历史   :")
-    InsBufLine(hbuf, ln + 13, "  1.日    期   : @szTime@")
+    InsBufLine(hbuf, ln + 12, "修改历史   :")
+    InsBufLine(hbuf, ln + 13, "\@date @szTime@")
 
     if( strlen(szMyName)>0 )
     {
-       InsBufLine(hbuf, ln + 14, "    作    者   : @szName@")
+       InsBufLine(hbuf, ln + 14, "\@author @szName@")
     }
     else
     {
-       InsBufLine(hbuf, ln + 14, "    作    者   : #")
+       InsBufLine(hbuf, ln + 14, "\@author #")
     }
-    InsBufLine(hbuf, ln + 15, "    修改内容   : 创建文件")    
+    InsBufLine(hbuf, ln + 15, "修改内容   : 创建文件")    
     InsBufLine(hbuf, ln + 16, "")
     InsBufLine(hbuf, ln + 17, "******************************************************************************/")
     InsBufLine(hbuf, ln + 18, "")
     InsBufLine(hbuf, ln + 19, "/*----------------------------------------------*")
-    InsBufLine(hbuf, ln + 20, " * 包含头文件                                   *")
+    InsBufLine(hbuf, ln + 20, " * 宏定义包含头文件                                   *")
     InsBufLine(hbuf, ln + 21, " *----------------------------------------------*/")
     InsBufLine(hbuf, ln + 22, "")
     InsBufLine(hbuf, ln + 23, "/*----------------------------------------------*")
@@ -1953,7 +2143,7 @@ macro InsertFileHeaderCN(hbuf, ln,szName,szContent)
     DelBufLine(hbuf,nlnDesc +10)
     
     //自动排列显示功能描述
-    CommentContent(hbuf,nlnDesc+10,"  功能描述   : ",szContent,0)
+    CommentContent(hbuf,nlnDesc+10,"@file ",szContent,0)
 }
 
 macro GetFunctionList(hbuf,hnewbuf)
@@ -2456,6 +2646,7 @@ macro FuncHeadCommentCN(hbuf, ln, szFunc, szMyName,newFunc)
             szTemp = strmid(szLine,0,iBegin)
             szTemp = TrimString(szTemp)
             szRet =  GetFirstWord(szTemp)
+            //Msg("szRet is @szRet@")
             if(symbol.Type == "Method")
             {
                 szTemp = strmid(szTemp,strlen(szRet),strlen(szTemp))
@@ -2484,16 +2675,13 @@ macro FuncHeadCommentCN(hbuf, ln, szFunc, szMyName,newFunc)
         szRet = ""
     }
     InsBufLine(hbuf, ln, "/**")
-    if( strlen(szFunc)>0 )
-    {
-        InsBufLine(hbuf, ln+1, "*\@name  : @szFunc@")
-    }
-    else
-    {
-        InsBufLine(hbuf, ln+1, "*\@name  : #")
-    }
-    oldln = ln
-    InsBufLine(hbuf, ln+2, "*\@brief  : ")
+
+	oldln = ln
+	InsBufLine(hbuf, ln+1, "*\@brief  : ")
+	InsBufLine(hbuf, ln+2, "*")
+	ln = ln +1
+    InsBufLine(hbuf, ln+2, "*")
+
     szIns = "*\@param "
     if(newFunc != 1)
     {
@@ -2503,10 +2691,12 @@ macro FuncHeadCommentCN(hbuf, ln, szFunc, szMyName,newFunc)
         {
             szTmp = GetBufLine(hTmpBuf, i)
             nLen = strlen(szTmp);
-            szBlank = CreateBlankString(nMaxParamSize - nLen + 2)
-            szTmp = cat(szTmp,szBlank)
+            //通过在参数后边补空格的方式，达到对齐的目的
+            //szBlank = CreateBlankString(nMaxParamSize - nLen + 2)
+            //szTmp = cat(szTmp,szBlank)
             ln = ln + 1
             szTmp = cat(szIns,szTmp)
+            //szTmp = cat(szTmp,":")
             InsBufLine(hbuf, ln+2, "@szTmp@")
             iIns = 1
             //szIns = "             "
@@ -2517,26 +2707,28 @@ macro FuncHeadCommentCN(hbuf, ln, szFunc, szMyName,newFunc)
     if(iIns == 0)
     {       
             ln = ln + 1
-            InsBufLine(hbuf, ln+2, "*\@param    : none")
+            InsBufLine(hbuf, ln+2, "*\@param none")
     }
-    InsBufLine(hbuf, ln+3, "*\@output    : none")
+    InsBufLine(hbuf, ln+3, "*")
     InsBufLine(hbuf, ln+4, "*\@return @szRet@")
     InsbufLIne(hbuf, ln+5, "* ");
-    InsBufLine(hbuf, ln+6, "*修改历史      :")
+    InsBufLine(hbuf, ln+6, "*")
     SysTime = GetSysTime(1);
     szTime = SysTime.Date
 
-    InsBufLine(hbuf, ln+7, "  1.日    期   : @szTime@")
-
     if( strlen(szMyName)>0 )
     {
-       InsBufLine(hbuf, ln+8, "    作    者   : @szMyName@")
+       InsBufLine(hbuf, ln+7, "*\@author @szMyName@")
     }
     else
     {
-       InsBufLine(hbuf, ln+8, "    作    者   : #")
+       InsBufLine(hbuf, ln+7, "*\@author #")
     }
-    InsBufLine(hbuf, ln+9, "    修改内容   : 新生成函数")    
+
+    InsBufLine(hbuf, ln+8, "*\@date @szTime@")
+
+
+    InsBufLine(hbuf, ln+9, "*\@note 新生成函数")    
     InsBufLine(hbuf, ln+10, "")    
     InsBufLine(hbuf, ln+11, "*/")
     if ((newFunc == 1) && (strlen(szFunc)>0))
@@ -2557,10 +2749,10 @@ macro FuncHeadCommentCN(hbuf, ln, szFunc, szMyName,newFunc)
     sel.lnLast = ln + 12       
     szContent = Ask("请输入函数功能描述的内容")
     setWndSel(hwnd,sel)
-    DelBufLine(hbuf,oldln + 2)
+    DelBufLine(hbuf,oldln + 1)
 
     //显示输入的功能描述内容
-    newln = CommentContent(hbuf,oldln+2,"*\@brief ",szContent,0) - 2
+    newln = CommentContent(hbuf,oldln+1,"*\@brief ",szContent,0) - 2
     ln = ln + newln - oldln
     if ((newFunc == 1) && (strlen(szFunc)>0))
     {
@@ -3158,6 +3350,8 @@ macro CreateNewHeaderFile()
         szMyName = Ask("Enter your name:")
         setreg(MYNAME, szMyName)
     }
+
+ 
     isymMax = GetBufSymCount(hbuf)
     isym = 0
     ln = 0
@@ -3405,6 +3599,17 @@ macro ConfigureSystem()
     {
        SetReg ("MYNAME", szName)
     }
+
+    szOrganizationName = ASK("Please input your organization name");
+    if(szOrganizationName == "#")
+    {
+       SetReg ("ORGANIZATION_NAME", "")
+    }
+    else
+    {
+       SetReg ("ORGANIZATION_NAME", szOrganizationName)
+    }
+
 }
 
 macro GetLeftBlank(szLine)
