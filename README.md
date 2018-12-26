@@ -29,19 +29,11 @@
 
 ![函数注释以及标签](/doc/FuncComment.gif "函数注释以及标签")
 
-<h3 id="3.Doxygen格式的单行注释风格">2. Doxygen格式的单行注释风格</h3>
+<h3 id="3.Doxygen格式的单行注释风格">3. Doxygen格式的单行注释风格</h3>
 
 &emsp;&emsp;改功能按照 `Doxygen` 注释风格的要求，为代码添加单行注释，需要为该宏——`DoxygenComment`设置专用的快捷键，本人一般将其绑定为 `Alt + D` 。
 ![Doxygen风格的单行注释](/doc/LineComment.gif "Doxygen风格的单行注释")
 
-
-
-
-[comment]: <> (<h2 id="二、快速上手">二、快速上手</h2>)
-[comment]: <> (<h3 id="1.基本原理">1. 基本原理</h3>)
-
-[comment]: <> (<h3 id="2.依赖环境">2. 依赖环境</h3>)
-[comment]: <> (<h3 id="3.快速使用">3. 快速使用</h3>)
 
 
 <h2 id="二、FAQ">二、FAQ</h2>
