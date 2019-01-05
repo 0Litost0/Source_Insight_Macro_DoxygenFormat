@@ -3376,14 +3376,14 @@ macro CreateNewHeaderFile()
         szContent = cat(szContent," 的头文件")
 
         //插入文件头说明
-        InsertFileHeaderCN(hOutbuf,0,szName,szContent)
+        InsertFileHeaderCN(hOutbuf,2,szName,szContent)
     }
     else
     {
         szContent = cat(szContent," header file")
 
         //插入文件头说明
-        InsertFileHeaderEN(hOutbuf,0,szName,szContent)        
+        InsertFileHeaderEN(hOutbuf,2,szName,szContent)        
     }
 
     lnMax = GetBufLineCount(hOutbuf)
