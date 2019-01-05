@@ -53,7 +53,7 @@
 
 3. Source Insight 宏语言:https://www.sourceinsight.com/doc/v4/userguide/index.html#t=Manual%2FMacro_Language%2FMacro_Language.htm  
 
-4. Doxygen注释风格]:https://my.oschina.net/zhfish/blog/35422  
+4. Doxygen注释风格:https://my.oschina.net/zhfish/blog/35422  
 
 5. Doxygen的使用方法，可以参见此博客:https://blog.csdn.net/chenyujing1234/article/details/19115319  
 
