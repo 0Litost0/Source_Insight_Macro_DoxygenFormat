@@ -4,10 +4,9 @@
 4.getreg 获取注册表键值
 5.setreg 设置注册表键值
 6.Msg 提示框，用以实现交互式程序
-
-
 7.DelBufLine
 8.InsBufLine
+9.InsBufLine (hbuf, ln, s)是在当前行的行首插入内容，当前行为1，则执行完该操作后，新输入的内容变为第一行（注意：下标都是从0开始）。
 
 debug示例：
 	ichFirst=sel.ichFirst;
