@@ -2729,7 +2729,7 @@ macro FuncHeadCommentCN(hbuf, ln, szFunc, szMyName,newFunc)
 
 
     InsBufLine(hbuf, ln+9, "*\@note 新生成函数")    
-    InsBufLine(hbuf, ln+10, "")    
+    InsBufLine(hbuf, ln+10, "*")    
     InsBufLine(hbuf, ln+11, "*/")
     if ((newFunc == 1) && (strlen(szFunc)>0))
     {
