@@ -1970,21 +1970,20 @@ macro InsertFileHeaderEN(hbuf, ln,szName,szContent)
 		 szOrganizationName = "XXX"
     }
 
-    
-    GetFunctionList(hbuf,hnewbuf)
+    SysTime = GetSysTime(1)
+    sz=SysTime.Year
+    sz1=SysTime.month
+    sz3=SysTime.day    GetFunctionList(hbuf,hnewbuf)
     InsBufLine(hbuf, ln + 0,  "/******************************************************************************")
     InsBufLine(hbuf, ln + 1,  "")
-    InsBufLine(hbuf, ln + 2,  "                  Copyright \@1998 - 2018 @szOrganizationName@")
+    InsBufLine(hbuf, ln + 2,  "                  Copyright \@1998 - @sz@ @szOrganizationName@")
     InsBufLine(hbuf, ln + 3,  "")
     InsBufLine(hbuf, ln + 4,  " ******************************************************************************")
     sz = GetFileName(GetBufName (hbuf))
     InsBufLine(hbuf, ln + 5,  "  File Name     : @sz@")
     InsBufLine(hbuf, ln + 6,  "  Version       : Initial Draft")
     InsBufLine(hbuf, ln + 7,  "  Author        : @szName@")
-    SysTime = GetSysTime(1)
-    sz=SysTime.Year
-    sz1=SysTime.month
-    sz3=SysTime.day
+
     InsBufLine(hbuf, ln + 8,  "  Created       : @sz@/@sz1@/@sz3@")
     InsBufLine(hbuf, ln + 9,  "  Last Modified :")
     szTmp = "  Description   : "
@@ -2063,17 +2062,19 @@ macro InsertFileHeaderCN(hbuf, ln,szName,szContent)
     {
 		 szOrganizationName = "XXX"
     }
+    SysTime = GetSysTime(1)
+    szTime = SysTime.Date
+    szCurYear = SysTime.Year
     InsBufLine(hbuf, ln + 0,  "/******************************************************************************")
     InsBufLine(hbuf, ln + 1,  "")
-    InsBufLine(hbuf, ln + 2,  "                  Copyright \@1998 - 2018 @szOrganizationName@")
+    InsBufLine(hbuf, ln + 2,  "                  Copyright \@1998 - @szCurYear@ @szOrganizationName@")
     InsBufLine(hbuf, ln + 3,  "")
     InsBufLine(hbuf, ln + 4,  " ******************************************************************************")
     sz = GetFileName(GetBufName (hbuf))
     InsBufLine(hbuf, ln + 5,  "文 件 名   : @sz@")
     InsBufLine(hbuf, ln + 6,  " 					")
     InsBufLine(hbuf, ln + 7,  "\@author @szName@")
-    SysTime = GetSysTime(1)
-    szTime = SysTime.Date
+
     InsBufLine(hbuf, ln + 8,  "\@date @szTime@")
     InsBufLine(hbuf, ln + 9,  "  最近修改   :")
     iLen = strlen (szContent)
@@ -5409,5 +5410,6 @@ macro FileHeaderCreate()
         InsertFileHeaderEN( hbuf,ln, szMyName,"" )
     }
 }
+
 
 
