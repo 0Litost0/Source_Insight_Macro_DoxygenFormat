@@ -13,7 +13,7 @@ macro CommentBlock()
 	while (iLine <= sel.lnLast)
 	{
 		szLine = GetBufLine(hbuf, iLine);
-		szLine = cat("//	", szLine);
+		szLine = cat("//", szLine);
 		PutBufLine(hbuf, iLine, szLine);
 		iLine = iLine + 1;
 	}
